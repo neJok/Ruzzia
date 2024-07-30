@@ -1,0 +1,8 @@
+*.pyc
+.DS_Store
+.idea/*
+.vscode/*
+.venv
+/poetry.toml
+__pycache__
+.env
