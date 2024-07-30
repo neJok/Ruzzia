@@ -7,7 +7,7 @@ from common.error import BadRequest, UnprocessableError
 from config import Config
 from database.mongo import connect_and_init_db, close_db_connect
 
-from api.users import connect
+from api import users
 
 app = FastAPI()
 
@@ -61,7 +61,7 @@ async def unprocessable_error_handler(
 
 # API Path
 app.include_router(
-    connect.router,
+    users.router,
     prefix='/users',
     tags=["users"]
 )
