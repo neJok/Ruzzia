@@ -14,13 +14,13 @@ router = APIRouter()
             }
             )
 async def get_user(
-    addresss: str,
+    address: str,
     db: AsyncIOMotorClient = Depends(get_db),
 ):
 
     user = await get_user_by_address(
         db,
-        addresss
+        address
     )
 
     if user is None:
