@@ -36,3 +36,11 @@ class UnprocessableError(BaseErrResp):
             'Unprocessable Entity',
             details
         )
+
+class UauthorizatedError(BaseErrResp):
+    def __init__(self, details: list):
+        super(UauthorizatedError, self).__init__(
+            401,
+            'Uauthorizated',
+            details,
+        )

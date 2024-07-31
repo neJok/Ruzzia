@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.common.error import BadRequest, UnprocessableError
 from app.config import Config
@@ -12,6 +13,15 @@ app = FastAPI()
 
 app.add_event_handler("startup", connect_and_init_db)
 app.add_event_handler("shutdown", close_db_connect)
+
+# Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # TODO: Set frontend domain in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # openapi schema
 def custom_openapi():

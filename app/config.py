@@ -12,4 +12,13 @@ class Config:
         'mongodb_url': os.getenv('MONGO_URL'),
         'db_username': os.getenv('MONGO_USER'),
         'db_password': os.getenv('MONGO_PASSWORD'),
+
+        'ton_connect_secret': os.getenv('TON_CONNECT_SECRET'),
+        'payload_ttl': int(os.getenv('PAYLOAD_TTL')),
+        'proof_ttl': int(os.getenv('PROOF_TTL')),
+
+        'access_secret_key': os.getenv('JWT_ACCESS_SECRET_KEY'),
+        'access_token_expire_minutes': int(os.getenv('JWT_ACCESS_TOKEN_EXPIRE_MINUTES')),
+        'refresh_secret_key': os.getenv('JWT_REFRESH_SECRET_KEY'),
+        'refresh_token_expire_minutes': int(os.getenv('JWT_REFRESH_TOKEN_EXPIRE_MINUTES')),
     }

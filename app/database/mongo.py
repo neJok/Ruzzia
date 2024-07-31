@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 import logging
 
@@ -10,7 +10,7 @@ load_dotenv()
 db_client: AsyncIOMotorClient | None = None
 
 
-async def get_db() -> AsyncIOMotorClient:
+async def get_db() -> AsyncIOMotorDatabase:
     db_name = Config.app_settings.get('db_name')
     return db_client[db_name]
 
