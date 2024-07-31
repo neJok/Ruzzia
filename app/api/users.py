@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Response
-from database.mongo import get_db, AsyncIOMotorClient
-from database.user import get_user_by_address
-from models.user.get_user import GetUserResp
+
+from app.database.mongo import get_db, AsyncIOMotorClient
+from app.database.user import get_user_by_address
+from app.models.user.get_user import GetUserResp
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ async def get_user(
         addresss
     )
 
-    if None is user:
+    if user is None:
         return Response(status_code=204)
 
     return GetUserResp(name=user.get("name"))

@@ -1,4 +1,5 @@
-from models.user.user_model import UserDB
+from app.models.user.user_model import UserDB
+
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 __db_collection = 'users'

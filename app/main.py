@@ -3,11 +3,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
 
-from common.error import BadRequest, UnprocessableError
-from config import Config
-from database.mongo import connect_and_init_db, close_db_connect
-
-from api import users
+from app.common.error import BadRequest, UnprocessableError
+from app.config import Config
+from app.database.mongo import connect_and_init_db, close_db_connect
+from app.api import users
 
 app = FastAPI()
 

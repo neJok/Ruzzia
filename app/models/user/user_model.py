@@ -1,7 +1,8 @@
 from pydantic import BaseModel, constr
+
 from datetime import datetime
 
-from models.mongo_model import MongoModel
+from app.models.mongo_model import MongoModel
 
 
 class UserBase(BaseModel):
