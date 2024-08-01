@@ -47,6 +47,7 @@ services:
       - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI}
 
       - FRONTEND_URI=${FRONTEND_URI}
+      - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
 
     ports:
       - 5000:5000

@@ -26,5 +26,7 @@ class Config:
         'discord_client_secret': os.getenv('DISCORD_CLIENT_SECRET'),
         'discord_redirect_uri': os.getenv('DISCORD_REDIRECT_URI'),
 
-        'frontend_uri': os.getenv('FRONTEND_URI')
+        'frontend_uri': os.getenv('FRONTEND_URI'),
+        
+        'admin_secret_key': os.getenv('ADMIN_SECRET_KEY')
     }

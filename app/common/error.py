@@ -37,10 +37,10 @@ class UnprocessableError(BaseErrResp):
             details
         )
 
-class UauthorizatedError(BaseErrResp):
+class UnauthorizatedError(BaseErrResp):
     def __init__(self, details: list):
-        super(UauthorizatedError, self).__init__(
+        super(UnauthorizatedError, self).__init__(
             401,
-            'Uauthorizated',
+            'Unauthorizated',
             details,
         )

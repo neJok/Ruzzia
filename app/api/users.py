@@ -1,10 +1,10 @@
 import hmac
+import time
+
 from random import choices
 from string import ascii_letters, digits
-import time
 from typing import Optional
-
-from fastapi import APIRouter, Cookie, Depends, Request, Response
+from fastapi import APIRouter, Cookie, Depends, Request
 from fastapi.responses import RedirectResponse
 from nacl.utils import random
 from base64 import b64decode
@@ -21,11 +21,13 @@ from app.database.mongo import get_db
 from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
 from app.common.discord_api import get_user_discord_id, authorize_discord
-from app.common.jwt import create_access_token, create_refresh_token, get_current_user, decode_access_token
+from app.common.jwt import create_access_token, create_refresh_token, get_current_user, decode_access_token, create_minecraft_token
 from app.common.nft import check_user_existance_in_presales_table
 from app.models.user.token import TokensResponse
 from app.models.user.user_model import UserDB
 from app.models.user.nft_presence import NftPresenceResponse
+from app.models.user.connect_minecraft import MinecraftTokenReponse
+
 
 router = APIRouter()
 
@@ -129,14 +131,14 @@ async def nft_presence(user: UserDB = Depends(get_current_user)):
 async def discord_oauth2(access_token: str, db: AsyncIOMotorDatabase = Depends(get_db)):
     address = await decode_access_token(access_token)
     if not address:
-        return BadRequest(['Could not validate access token'])
+        raise BadRequest(['Could not validate access token'])
 
     user = await get_user_by_address(db, address)
     if not user:
-        return BadRequest(['User not found'])
+        raise BadRequest(['User not found'])
 
     if user.discord.id is not None:
-        return BadRequest(['You already have a discord connected'])
+        raise BadRequest(['You already have a discord connected'])
 
     state = sha256(''.join(choices(ascii_letters + digits, k=16)).encode()).hexdigest()
     await update_user_discord_state(db, user.id, state)
@@ -162,12 +164,24 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
     try:
         access_token = await authorize_discord(code)
     except:
-        return BadRequest(["Failed to obtain access token"])
+        raise BadRequest(["Failed to obtain access token"])
 
     try:
         user_id = await get_user_discord_id(access_token)
     except:
-        return BadRequest(["Failed to fetch user info"])
+        raise BadRequest(["Failed to fetch user info"])
     
     await update_user_discord_id(db, state, user_id)
     return RedirectResponse(Config.app_settings['frontend_uri'])
+    
+
+@router.get('/minecraft', status_code=200, response_model=MinecraftTokenReponse, summary="Create minecraft connect token", responses={400: {}})
+async def minecraft_connect(user: UserDB = Depends(get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
+    if user.minecraft.name:
+        raise BadRequest(['You already have a minecraft connected'])
+    
+    minecraft_token_expires = timedelta(minutes=Config.app_settings['access_token_expire_minutes'])
+    minecraft_token = create_minecraft_token(
+        data={"sub": user.id}, expires_delta=minecraft_token_expires
+    )
+    return MinecraftTokenReponse(token=minecraft_token)

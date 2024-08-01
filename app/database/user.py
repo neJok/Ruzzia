@@ -30,6 +30,9 @@ async def create_user(
                 "id": None,
                 "state": None,
             },
+            "minecraft": {
+                "name": None,
+            }
         }
     )
 
@@ -51,4 +54,14 @@ async def update_user_discord_id(
     await conn[__db_collection].update_one(
         {"discord.state": state, "discord.id": None},
         {"$set": {"discord.id": discord_id}}
+    )
+
+async def update_user_minecraft_name(
+    conn: AsyncIOMotorDatabase,
+    id: str,
+    name: str
+):
+    await conn[__db_collection].update_one(
+        {"_id": id},
+        {"$set": {"minecraft.name": name}}
     )

@@ -4,10 +4,10 @@ from fastapi.responses import JSONResponse
 from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.common.error import BadRequest, UnprocessableError
+from app.common.error import BadRequest, UnprocessableError, UnauthorizatedError
 from app.config import Config
 from app.database.mongo import connect_and_init_db, close_db_connect
-from app.api import users
+from app.api import admin, users
 
 app = FastAPI()
 
@@ -67,10 +67,23 @@ async def unprocessable_error_handler(
 ) -> JSONResponse:
     return exc.gen_err_resp()
 
+@app.exception_handler(UnauthorizatedError)
+async def unauthorizated_error_handler(
+    req: Request,
+    exc: UnauthorizatedError
+) -> JSONResponse:
+    return exc.gen_err_resp()
+
 
 # API Path
 app.include_router(
     users.router,
     prefix='/users',
-    tags=["users"]
+    tags=["Users"]
+)
+
+app.include_router(
+    admin.router,
+    prefix='/admin',
+    tags=['Admin']
 )
