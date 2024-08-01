@@ -28,6 +28,17 @@ async def get_user_by_minecraft_name(
     user['id'] = user.pop('_id')
     return UserDB(**user)
 
+async def get_user_by_discord_id(
+    conn: AsyncIOMotorDatabase,
+    discord_id: int
+) -> UserDB | None:
+    user = await conn[__db_collection].find_one({"discord.id": discord_id})
+    if user is None:
+        return None
+    
+    user['id'] = user.pop('_id')
+    return UserDB(**user)
+
 async def create_user(
     conn: AsyncIOMotorDatabase,
     address: str

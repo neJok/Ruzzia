@@ -16,7 +16,7 @@ from datetime import timedelta
 
 from app.config import Config
 from app.models.user.connect_wallet import ConnectWalletRequest, PayloadResponse
-from app.database.user import get_user_by_address, create_user, update_user_discord_id, update_user_discord_state
+from app.database.user import get_user_by_address, create_user, update_user_discord_id, update_user_discord_state, get_user_by_discord_id
 from app.database.mongo import get_db
 from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
@@ -170,6 +170,9 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
         user_id = await get_user_discord_id(access_token)
     except:
         raise BadRequest(["Failed to fetch user info"])
+    
+    if await get_user_by_discord_id(db, user_id):
+        raise BadRequest(["This account is already linked to another wallet"])
     
     await update_user_discord_id(db, state, user_id)
     return RedirectResponse(Config.app_settings['frontend_uri'])

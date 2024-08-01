@@ -28,6 +28,9 @@ async def connect(user_info: MinecraftUserInfo, db: AsyncIOMotorDatabase = Depen
     if user.minecraft.name:
         raise BadRequest(['You already have a minecraft connected'])
     
+    if await get_user_by_minecraft_name(db, user_info.name):
+        raise BadRequest(['This account is already linked to another wallet'])
+    
     user.minecraft.name = user_info.name
     
     await update_user_minecraft_name(db, user.id, user_info.name)
