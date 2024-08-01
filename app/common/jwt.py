@@ -36,20 +36,24 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: AsyncIOMotorDatabase = Depends(get_db)) -> UserDB:
-    token = credentials.credentials
     credentials_exception = UauthorizatedError(["Could not validate credentials"])
-    try:
-        payload = jwt.decode(token, Config.app_settings['access_secret_key'], algorithms=["HS256"])
-        address: str | None = payload.get("sub")
-        if address is None:
-            raise credentials_exception
-        
-        token_data = TokenData(address=address)
-    except InvalidTokenError:
+    token = credentials.credentials
+    
+    address = await decode_access_token(token)
+    if not address:
         raise credentials_exception
     
-    user = await get_user_by_address(db, token_data.address)
+    user = await get_user_by_address(db, address)
     if user is None:
         raise credentials_exception
     
     return user
+
+async def decode_access_token(access_token: str) -> str:
+    try:
+        payload = jwt.decode(access_token, Config.app_settings['access_secret_key'], algorithms=["HS256"])
+    except InvalidTokenError:
+        return None
+    
+    address: str | None = payload.get("sub")
+    return address

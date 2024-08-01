@@ -26,5 +26,29 @@ async def create_user(
             "_id": address, 
             "created_at": datetime.now(),
             "balance": 0,
+            "discord": {
+                "id": None,
+                "state": None,
+            },
         }
+    )
+
+async def update_user_discord_state(
+    conn: AsyncIOMotorDatabase,
+    user_id: str,
+    state: str,
+):
+    await conn[__db_collection].update_one(
+        {"_id": user_id},
+        {"$set": {"discord.state": state}}
+    )
+
+async def update_user_discord_id(
+    conn: AsyncIOMotorDatabase,
+    state: str,
+    discord_id: int
+):
+    await conn[__db_collection].update_one(
+        {"discord.state": state, "discord.id": None},
+        {"$set": {"discord.id": discord_id}}
     )

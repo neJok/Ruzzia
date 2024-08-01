@@ -1,7 +1,11 @@
 import hmac
+from random import choices
+from string import ascii_letters, digits
 import time
+from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Cookie, Depends, Request, Response
+from fastapi.responses import RedirectResponse
 from nacl.utils import random
 from base64 import b64decode
 from hashlib import sha256
@@ -10,14 +14,15 @@ from nacl.encoding import HexEncoder
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import timedelta
 
+from app.config import Config
 from app.models.user.connect_wallet import ConnectWalletRequest, PayloadResponse
-from app.database.user import get_user_by_address, create_user
+from app.database.user import get_user_by_address, create_user, update_user_discord_id, update_user_discord_state
 from app.database.mongo import get_db
 from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
-from app.common.jwt import create_access_token, create_refresh_token, get_current_user
-from app.common.nft import check_user_existance_in_presale_table
-from app.config import Config
+from app.common.discord_api import get_user_discord_id, authorize_discord
+from app.common.jwt import create_access_token, create_refresh_token, get_current_user, decode_access_token
+from app.common.nft import check_user_existance_in_presales_table
 from app.models.user.token import TokensResponse
 from app.models.user.user_model import UserDB
 from app.models.user.nft_presence import NftPresenceResponse
@@ -118,4 +123,51 @@ async def get_user_info(user: UserDB = Depends(get_current_user)):
 @router.post('/nft_presence', response_model=NftPresenceResponse, status_code=200, summary='User verification of nft presence', responses={400: {}})
 async def nft_presence(user: UserDB = Depends(get_current_user)):
     user_wallet_address = user.id
-    return NftPresenceResponse(presence=check_user_existance_in_presale_table(user_wallet_address))
+    return NftPresenceResponse(presence=check_user_existance_in_presales_table(user_wallet_address))
+
+@router.get('/discord', status_code=200, include_in_schema=False)
+async def discord_oauth2(access_token: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    address = await decode_access_token(access_token)
+    if not address:
+        return BadRequest(['Could not validate access token'])
+
+    user = await get_user_by_address(db, address)
+    if not user:
+        return BadRequest(['User not found'])
+
+    if user.discord.id is not None:
+        return BadRequest(['You already have a discord connected'])
+
+    state = sha256(''.join(choices(ascii_letters + digits, k=16)).encode()).hexdigest()
+    await update_user_discord_state(db, user.id, state)
+    
+    response = RedirectResponse(f"https://discord.com/api/oauth2/authorize?client_id={Config.app_settings['discord_client_id']}&redirect_uri={Config.app_settings['discord_redirect_uri']}&response_type=code&scope=identify&state={state}")
+    response.set_cookie(key="oauth_state", value=state, httponly=True)
+    return response
+
+@router.get('/discord-callback', status_code=200, include_in_schema=False)
+async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] = Cookie(None), db: AsyncIOMotorDatabase = Depends(get_db)):
+    code = request.query_params.get("code")
+    state = request.query_params.get("state")
+
+    if not code or not state:
+        raise BadRequest(["Authorization code or state not provided"])
+    
+    if state != oauth_state:
+        raise BadRequest(["Invalid state"])
+
+    response = RedirectResponse(url="/")
+    response.delete_cookie(key="oauth_state")
+    
+    try:
+        access_token = await authorize_discord(code)
+    except:
+        return BadRequest(["Failed to obtain access token"])
+
+    try:
+        user_id = await get_user_discord_id(access_token)
+    except:
+        return BadRequest(["Failed to fetch user info"])
+    
+    await update_user_discord_id(db, state, user_id)
+    return RedirectResponse(Config.app_settings['frontend_uri'])
