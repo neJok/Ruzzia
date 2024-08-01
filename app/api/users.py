@@ -16,9 +16,11 @@ from app.database.mongo import get_db
 from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
 from app.common.jwt import create_access_token, create_refresh_token, get_current_user
+from app.common.nft import check_user_existance_in_presales_table
 from app.config import Config
 from app.models.user.token import TokensResponse
 from app.models.user.user_model import UserDB
+from app.models.user.nft_presence import NftPresenceResponse
 
 router = APIRouter()
 
@@ -112,3 +114,8 @@ async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depen
 @router.post('/', response_model=UserDB, status_code=200, summary='Get user info')
 async def get_user_info(user: UserDB = Depends(get_current_user)):
     return user
+
+@router.post('/nft_presence', response_model=NftPresenceResponse, status_code=200, summary='User verification of nft presence', responses={400: {}})
+async def nft_presence(user: UserDB = Depends(get_current_user)):
+    user_wallet_address = user.id
+    return NftPresenceResponse(presence=check_user_existance_in_presales_table(user_wallet_address))
