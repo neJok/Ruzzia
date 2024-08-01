@@ -20,6 +20,8 @@ async def connect_and_init_db():
     try:
         db_client = AsyncIOMotorClient(
             Config.app_settings.get('mongodb_url'),
+            username=Config.app_settings.get('db_username'),
+            password=Config.app_settings.get('db_password'),
         )
         logging.info('Connected to mongo.')
     except Exception as e:
