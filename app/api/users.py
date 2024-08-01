@@ -22,7 +22,7 @@ from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
 from app.common.discord_api import get_user_discord_id, authorize_discord
 from app.common.jwt import create_access_token, create_refresh_token, get_current_user, decode_access_token, create_minecraft_token
-from app.common.nft import check_user_existance_in_presales_table
+from app.common.nft import check_user_existance_in_presale_table
 from app.models.user.token import TokensResponse
 from app.models.user.user_model import UserDB
 from app.models.user.nft_presence import NftPresenceResponse
@@ -125,7 +125,7 @@ async def get_user_info(user: UserDB = Depends(get_current_user)):
 @router.post('/nft_presence', response_model=NftPresenceResponse, status_code=200, summary='User verification of nft presence', responses={400: {}})
 async def nft_presence(user: UserDB = Depends(get_current_user)):
     user_wallet_address = user.id
-    return NftPresenceResponse(presence=check_user_existance_in_presales_table(user_wallet_address))
+    return NftPresenceResponse(presence=check_user_existance_in_presale_table(user_wallet_address))
 
 @router.get('/discord', status_code=200, include_in_schema=False)
 async def discord_oauth2(access_token: str, db: AsyncIOMotorDatabase = Depends(get_db)):
