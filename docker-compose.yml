@@ -1,23 +1,25 @@
 services:
-  db:
-    image: mongo
+  mongodb:
+    image: mongo:latest
     restart: always
     ports:
       - 27017:27017
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 10s
       retries: 5
     volumes:
       - db-data:/data/db
+      - mongod.conf:/etc/mongo/mongod.conf
     env_file:
       - .env
     environment:
       - MONGO_DB=${MONGO_DB}
       - MONGO_URL=${MONGO_URL}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    command: mongod --config /etc/mongo/mongod.conf
 
   app:
     restart: always
@@ -52,3 +54,4 @@ services:
 
 volumes:
   db-data:
+  mongod.conf:
