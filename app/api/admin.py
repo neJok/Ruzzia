@@ -5,7 +5,7 @@ from app.common.admin import check_admin_token
 from app.common.error import BadRequest
 from app.common.jwt import decode_minecraft_token
 from app.database.mongo import get_db
-from app.database.user import get_user_by_address, update_user_minecraft_name
+from app.database.user import get_user_by_address, update_user_minecraft_name, get_user_by_minecraft_name
 from app.models.admin.connect import MinecraftUserInfo
 from app.models.user.user_model import UserDB
 
@@ -31,5 +31,13 @@ async def connect(user_info: MinecraftUserInfo, db: AsyncIOMotorDatabase = Depen
     user.minecraft.name = user_info.name
     
     await update_user_minecraft_name(db, user.id, user_info.name)
+    return user
+
+@router.get('/minecraft/user', summary='Get user by name', response_model=UserDB, responses={400: {}})
+async def get_user_by_name(name: str, db: AsyncIOMotorDatabase = Depends(get_db)):
+    user = await get_user_by_minecraft_name(db, name)
+    if not user:
+        return BadRequest(['User not found'])
+    
     return user
     

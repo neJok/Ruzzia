@@ -12,7 +12,7 @@ class UserDiscord(BaseModel):
 
 class UserMinecraft(BaseModel):
     name: Optional[str] = None
-
+    privilege: str
 
 class UserBase(BaseModel):
     balance: float

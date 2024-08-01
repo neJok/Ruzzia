@@ -17,6 +17,17 @@ async def get_user_by_address(
     user['id'] = user.pop('_id')
     return UserDB(**user)
 
+async def get_user_by_minecraft_name(
+    conn: AsyncIOMotorDatabase,
+    name: str
+) -> UserDB | None:
+    user = await conn[__db_collection].find_one({"minecraft.name": name})
+    if user is None:
+        return None
+    
+    user['id'] = user.pop('_id')
+    return UserDB(**user)
+
 async def create_user(
     conn: AsyncIOMotorDatabase,
     address: str
@@ -32,6 +43,7 @@ async def create_user(
             },
             "minecraft": {
                 "name": None,
+                "privilege": "default",
             }
         }
     )
