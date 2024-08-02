@@ -28,5 +28,7 @@ class Config:
 
         'frontend_uri': os.getenv('FRONTEND_URI'),
         
-        'admin_secret_key': os.getenv('ADMIN_SECRET_KEY')
+        'admin_secret_key': os.getenv('ADMIN_SECRET_KEY'),
+
+        'default_timezone': os.getenv('DEFAULT_TIMEZONE')
     }
