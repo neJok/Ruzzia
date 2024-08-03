@@ -40,7 +40,7 @@ async def connect(user_info: MinecraftUserInfo, db: AsyncIOMotorDatabase = Depen
 async def get_user_by_name(name: str, db: AsyncIOMotorDatabase = Depends(get_db)):
     user = await get_user_by_minecraft_name(db, name)
     if not user:
-        return BadRequest(['User not found'])
+        raise BadRequest(['User not found'])
     
     return user
     
