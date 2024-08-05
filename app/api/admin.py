@@ -56,7 +56,7 @@ async def get_user_by_id(discord_id: int, db: AsyncIOMotorDatabase = Depends(get
     return user
 
 
-@router.post('/money-transfer', status_code=204, summary="Transfer money from one user to another", responses={400: {}})
+@router.post('/minecraft/money-transfer', status_code=204, summary="Transfer money from one user to another", responses={400: {}})
 async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
     if transfer_data.sender_name == transfer_data.recipient_name:
         raise BadRequest(['Sender and recipient names should be different'])
