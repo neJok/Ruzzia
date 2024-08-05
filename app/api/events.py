@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.database.mongo import get_db
-from app.models.event.event_model import EventBase, EventResponse
+from app.models.event.event_model import EventBase
 from app.database.event import create_event, get_upcoming_event
 
 
@@ -11,9 +11,9 @@ router = APIRouter()
 
 @router.post('/create', summary='Create new event', status_code=201, responses={400: {}})
 async def create(event_data: EventBase, db: AsyncIOMotorDatabase = Depends(get_db)):
-    await create_event(db, event_data.name, event_data.start_time.strftime('%H:%M'))
+    await create_event(db, **event_data)
 
 
-@router.get('/upcoming', summary='Get upcoming event', response_model=EventResponse, responses={400: {}})
+@router.get('/upcoming', summary='Get upcoming event', response_model=EventBase, responses={400: {}})
 async def upcoming(db: AsyncIOMotorDatabase = Depends(get_db)):
     return await get_upcoming_event(db)
