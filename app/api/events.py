@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from app.common.admin import check_admin_token
 from app.database.mongo import get_db
 from app.models.event.event_model import EventBase
 from app.database.event import create_event, get_upcoming_event
 
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(check_admin_token)]
+)
 
 
 @router.post('/create', summary='Create new event', status_code=201, responses={400: {}})
