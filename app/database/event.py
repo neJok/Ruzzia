@@ -2,7 +2,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from datetime import time
 
-from app.models.event.event_model import EventResponse
+from app.models.event.event_model import EventBase
 from app.common.time import convert_to_iso8601
 from app.config import Config
 
@@ -22,7 +22,7 @@ async def create_event(
     })
 
 
-async def get_upcoming_event(conn: AsyncIOMotorDatabase) -> EventResponse:
+async def get_upcoming_event(conn: AsyncIOMotorDatabase) -> EventBase:
     events = await conn[__db_collection].find({}, {"_id": 0, "expired_at": 0}).sort("start_time", 1).to_list(length=1)
     upcoming_event = events[0]
-    return EventResponse(**upcoming_event)
+    return EventBase(**upcoming_event)
