@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post('/create', summary='Create new event', status_code=201, responses={400: {}})
+@router.post('/create', summary='Create new event', status_code=200, responses={400: {}})
 async def create(event_data: EventBase, db: AsyncIOMotorDatabase = Depends(get_db)):
     await create_event(db, **event_data)
 
