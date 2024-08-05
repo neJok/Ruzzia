@@ -88,3 +88,30 @@ async def update_user_minecraft_name(
         {"_id": id},
         {"$set": {"minecraft.name": name}}
     )
+
+
+async def make_transfer(
+    conn: AsyncIOMotorDatabase,
+    sender_name: str,
+    recipient_name: str,
+    amount: int
+):
+    await conn[__db_collection].update_one(
+        {'minecraft.name': sender_name},
+        {"$inc": {"balance": -amount}}
+    )
+    await conn[__db_collection].update_one(
+        {'minecraft.name': recipient_name},
+        {"$inc": {"balance": amount}}
+    )
+
+
+async def has_sufficient_funds(
+    conn: AsyncIOMotorDatabase, 
+    sender_name: str, 
+    amount: int
+):
+    sender = await conn[__db_collection].find_one({'minecraft.name': sender_name})
+    sender_balance = sender['balance']
+    print(sender_balance)
+    return sender_balance >= amount

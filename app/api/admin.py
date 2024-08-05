@@ -5,9 +5,12 @@ from app.common.admin import check_admin_token
 from app.common.error import BadRequest
 from app.common.jwt import decode_minecraft_token
 from app.database.mongo import get_db
-from app.database.user import get_user_by_address, update_user_minecraft_name, get_user_by_minecraft_name, get_user_by_discord_id
+from app.database.user import (get_user_by_address, update_user_minecraft_name, 
+                               get_user_by_minecraft_name, get_user_by_discord_id,
+                               has_sufficient_funds, make_transfer)
 from app.models.admin.connect import MinecraftUserInfo
 from app.models.user.user_model import UserDB
+from app.models.admin.money_transfer import MoneyTransferRequest
 
 
 router = APIRouter(
@@ -51,3 +54,23 @@ async def get_user_by_id(discord_id: int, db: AsyncIOMotorDatabase = Depends(get
         raise BadRequest(['User not found'])
     
     return user
+
+
+@router.post('/money-transfer', status_code=204, summary="Transfer money from one user to another", responses={400: {}})
+async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+    if transfer_data.sender_name == transfer_data.recipient_name:
+        raise BadRequest(['Sender and recipient names should be different'])
+    
+    sender = await get_user_by_minecraft_name(db, transfer_data.sender_name)
+    recipient = await get_user_by_minecraft_name(db, transfer_data.recipient_name)
+    if not sender:
+        raise BadRequest(['Sender not found'])
+    
+    if not recipient:
+        raise BadRequest(['Recipient not found'])
+    
+    if not await has_sufficient_funds(db, transfer_data.sender_name, transfer_data.amount):
+        raise BadRequest(['Sender does not have sufficient funds'])
+    
+    await make_transfer(db, transfer_data.sender_name, 
+                        transfer_data.recipient_name, transfer_data.amount)

@@ -122,7 +122,7 @@ async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depen
 async def get_user_info(user: UserDB = Depends(get_current_user)):
     return user
 
-@router.post('/nft_presence', response_model=NftPresenceResponse, status_code=200, summary='User verification of nft presence', responses={400: {}})
+@router.post('/nft-presence', response_model=NftPresenceResponse, status_code=200, summary='User verification of nft presence', responses={400: {}})
 async def nft_presence(user: UserDB = Depends(get_current_user)):
     user_wallet_address = user.id
     return NftPresenceResponse(presence=check_user_existance_in_presale_table(user_wallet_address))
