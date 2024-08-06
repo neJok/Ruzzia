@@ -1,5 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
+
 from datetime import datetime
+from decimal import Decimal
 
 from app.models.user.user_model import UserDB
 
@@ -94,7 +96,7 @@ async def make_transfer(
     conn: AsyncIOMotorDatabase,
     sender_name: str,
     recipient_name: str,
-    amount: int
+    amount: Decimal
 ):
     await conn[__db_collection].update_one(
         {'minecraft.name': sender_name},
@@ -109,9 +111,31 @@ async def make_transfer(
 async def has_sufficient_funds(
     conn: AsyncIOMotorDatabase, 
     sender_name: str, 
-    amount: int
+    amount: Decimal
 ):
     sender = await conn[__db_collection].find_one({'minecraft.name': sender_name})
     sender_balance = sender['balance']
     print(sender_balance)
     return sender_balance >= amount
+
+
+async def top_up(
+    conn: AsyncIOMotorDatabase,
+    user_address: str,
+    amount: Decimal
+):
+    await conn[__db_collection].update_one(
+        {"_id": user_address},
+        {"$inc": {"balance": amount}}
+    )
+
+
+async def rank_user(
+    conn: AsyncIOMotorDatabase,
+    user_address: str,
+    rank: str
+):
+    conn[__db_collection].update_one(
+        {"_id": user_address},
+        {"$set": {""}}
+    )
