@@ -1,5 +1,5 @@
 from app.config import Config
-from app.database.user import top_up, privilege_user
+from app.database.user import top_up, privilege_user_minecraft
 
 from decimal import Decimal
 
@@ -45,7 +45,7 @@ async def get_last_transactions(
                     elif action["comment"] == "Privilege":
                         # TODO: redo mapper when rank costs will be known
                         privilege = privilege_mapper(int(amount))
-                        await privilege_user(db, user_address, privilege)
+                        await privilege_user_minecraft(db, user_address, privilege)
                     completed_transactions.append({
                                                     # "comment_id": comment_id, 
                                                    "amount": amount, 

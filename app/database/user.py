@@ -130,7 +130,7 @@ async def top_up(
     )
 
 
-async def privilege_user(
+async def privilege_user_minecraft(
     conn: AsyncIOMotorDatabase,
     user_address: str,
     privilege: str
