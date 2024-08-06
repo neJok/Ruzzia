@@ -130,12 +130,12 @@ async def top_up(
     )
 
 
-async def rank_user(
+async def privilege_user(
     conn: AsyncIOMotorDatabase,
     user_address: str,
-    rank: str
+    privilege: str
 ):
-    conn[__db_collection].update_one(
+    await conn[__db_collection].update_one(
         {"_id": user_address},
-        {"$set": {""}}
+        {"$set": {"minecraft.privilege": privilege}}
     )

@@ -1,12 +1,12 @@
 from app.config import Config
-from app.database.user import top_up, rank_user
+from app.database.user import top_up, privilege_user
 
 from decimal import Decimal
 
 import httpx
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-rank_mapper = {
+privilege_mapper = {
     0: "tourist",
     100: "worker",
     500: "citizen",
@@ -42,10 +42,10 @@ async def get_last_transactions(
                     user_address = action["sender"]["address"]
                     if action["comment"] == "Top up":
                         await top_up(db, user_address, amount)
-                    elif action["comment"] == "Rank":
+                    elif action["comment"] == "Privilege":
                         # TODO: redo mapper when rank costs will be known
-                        rank = rank_mapper(int(amount))
-                        await rank_user(db, user_address, rank)
+                        privilege = privilege_mapper(int(amount))
+                        await privilege_user(db, user_address, privilege)
                     completed_transactions.append({
                                                     # "comment_id": comment_id, 
                                                    "amount": amount, 
