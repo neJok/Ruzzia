@@ -16,6 +16,7 @@ class Config:
         'ton_connect_secret': os.getenv('TON_CONNECT_SECRET'),
         'payload_ttl': int(os.getenv('PAYLOAD_TTL')),
         'proof_ttl': int(os.getenv('PROOF_TTL')),
+        'ton_api_key': os.getenv('TON_API_KEY'),
 
         'access_secret_key': os.getenv('JWT_ACCESS_SECRET_KEY'),
         'access_token_expire_minutes': int(os.getenv('JWT_ACCESS_TOKEN_EXPIRE_MINUTES')),
@@ -25,10 +26,29 @@ class Config:
         'discord_client_id': os.getenv('DISCORD_CLIENT_ID'),
         'discord_client_secret': os.getenv('DISCORD_CLIENT_SECRET'),
         'discord_redirect_uri': os.getenv('DISCORD_REDIRECT_URI'),
+        'discord_bot_token': os.getenv('DISCORD_BOT_TOKEN'),
+        'discord_guild_id': os.getenv('DISCORD_GUILD_ID'),
+        'disord_logs_channel_id': os.getenv('DISCORD_LOGS_CHANNEL_ID'),
 
         'frontend_uri': os.getenv('FRONTEND_URI'),
         
         'admin_secret_key': os.getenv('ADMIN_SECRET_KEY'),
 
         'default_timezone': os.getenv('DEFAULT_TIMEZONE')
+    }
+
+    privilege_mapper = {
+        0: "tourist",
+        100: "worker",
+        500: "citizen",
+        1000: "aristocrat",
+        5000: "apostle"
+    }
+
+    privilege_roles = {
+        "tourist": "1268593987254485053",
+        "worker": "1268594072994447440",
+        "сitizen": "1268594127809937461",
+        "aristocrat": "1268594162530516992",
+        "apostle": "1268594193618436248"
     }
