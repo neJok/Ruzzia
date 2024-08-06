@@ -153,7 +153,7 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
     state = request.query_params.get("state")
 
     if not code or not state:
-        raise BadRequest(["Authorization code or state not provided"])
+        raise BadRequest(['Авторизационный "code" либо "state" не были получены'])
     
     if state != oauth_state:
         raise BadRequest(["Невалидное состояние"])
@@ -164,15 +164,15 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
     try:
         access_token = await authorize_discord(code)
     except:
-        raise BadRequest(["Failed to obtain access token"])
+        raise BadRequest(["Не удалось получить токен доступа"])
 
     try:
         user_id = await get_user_discord_id(access_token)
     except:
-        raise BadRequest(["Failed to fetch user info"])
+        raise BadRequest(["Не удалось получить информацию о пользователе"])
     
     if await get_user_by_discord_id(db, user_id):
-        raise BadRequest(["This account is already linked to another wallet"])
+        raise BadRequest(["Этот аккаунт уже привязан к другому кошельку"])
     
     await update_user_discord_id(db, state, user_id)
     return RedirectResponse(Config.app_settings['frontend_uri'])
@@ -181,7 +181,7 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
 @router.get('/minecraft', status_code=200, response_model=MinecraftTokenReponse, summary="Create minecraft connect token", responses={400: {}})
 async def minecraft_connect(user: UserDB = Depends(get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
     if user.minecraft.name:
-        raise BadRequest(['You already have a minecraft connected'])
+        raise BadRequest(['Майнкрафт уже подключен к данному аккаунту'])
     
     minecraft_token_expires = timedelta(minutes=Config.app_settings['access_token_expire_minutes'])
     minecraft_token = create_minecraft_token(
