@@ -1,8 +1,8 @@
 import aiohttp
 import httpx
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from decimal import Decimal
-from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.config import Config
 from app.database.user import top_up, privilege_user_minecraft, get_user_by_address
@@ -59,8 +59,7 @@ async def get_last_transactions(
                     
                     if action["comment"] == "Top up":
                         await top_up(db, user_address, amount)
-                    elif action["comment"] == "Rank":
-                        # TODO: redo mapper when rank costs will be known
+                    elif action["comment"] == "Privilege":                        # TODO: redo mapper when privilege costs will be known
                         privilege = Config.privilege_mapper(int(amount))
                         await privilege_user_minecraft(db, user_address, privilege)
 
