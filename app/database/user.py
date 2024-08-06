@@ -56,8 +56,9 @@ async def create_user(
             },
             "minecraft": {
                 "name": None,
-                "privilege": "default",
-            }
+                "privilege": "tourist",
+            },
+            "completed_transactions": []
         }
     )
 
@@ -115,7 +116,6 @@ async def has_sufficient_funds(
 ):
     sender = await conn[__db_collection].find_one({'minecraft.name': sender_name})
     sender_balance = sender['balance']
-    print(sender_balance)
     return sender_balance >= amount
 
 
@@ -138,4 +138,14 @@ async def privilege_user_minecraft(
     await conn[__db_collection].update_one(
         {"_id": user_address},
         {"$set": {"minecraft.privilege": privilege}}
+    )
+
+async def add_transaction(
+    conn: AsyncIOMotorDatabase,
+    user_address: str,
+    transaction_id: str
+):
+    await conn[__db_collection].update_one(
+        {"_id": user_address},
+        {"$push": {"completed_transactions": transaction_id}}
     )

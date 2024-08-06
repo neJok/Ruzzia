@@ -45,11 +45,7 @@ async def add_role_to_user(user_id, role_id):
 
     async with aiohttp.ClientSession() as session:
         async with session.put(url, headers=headers) as response:
-            if response.status == 204:
-                print(f"Role {role_id} successfully added to user {user_id}")
-            else:
-                print(f"Failed to add role: {response.status}")
-                print(await response.text())
+            return response.status
 
 
 async def remove_role_from_user(user_id, role_id):
@@ -61,15 +57,11 @@ async def remove_role_from_user(user_id, role_id):
 
     async with aiohttp.ClientSession() as session:
         async with session.delete(url, headers=headers) as response:
-            if response.status == 204:
-                print(f"Role {role_id} successfully removed from user {user_id}")
-            else:
-                print(f"Failed to remove role: {response.status}")
-                print(await response.text())
+            return response.status
 
 
 async def send_message_to_logs(message):
-    url = f"https://discord.com/api/v9/channels/{Config.app_settings['disord_logs_channel_iddisord_logs_channel_id']}/messages"
+    url = f"https://discord.com/api/v9/channels/{Config.app_settings['discord_logs_channel_id']}/messages"
     headers = {
         "Authorization": f"Bot {Config.app_settings['discord_bot_token']}",
         "Content-Type": "application/json"
@@ -80,8 +72,4 @@ async def send_message_to_logs(message):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, json=json_data) as response:
-            if response.status == 200 or response.status == 201:
-                print(f"Message successfully sent to channel")
-            else:
-                print(f"Failed to send message: {response.status}")
-                print(await response.text())
+            return response.status

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 from datetime import datetime
@@ -18,6 +18,7 @@ class UserBase(BaseModel):
     balance: float
     discord: UserDiscord
     minecraft: UserMinecraft
+    completed_transactions: List[str]
 
 
 class UserDB(UserBase, MongoModel):

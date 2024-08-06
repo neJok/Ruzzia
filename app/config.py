@@ -16,7 +16,9 @@ class Config:
         'ton_connect_secret': os.getenv('TON_CONNECT_SECRET'),
         'payload_ttl': int(os.getenv('PAYLOAD_TTL')),
         'proof_ttl': int(os.getenv('PROOF_TTL')),
-        'ton_api_key': os.getenv('TON_API_KEY'),
+        'our_wallet': os.getenv('OUR_WALLET'),
+        'jetton_master_address': os.getenv('JETTON_MASTER_ADDRESS'),
+        'token_symbol': os.getenv('TOKEN_SYMBOL'),
 
         'access_secret_key': os.getenv('JWT_ACCESS_SECRET_KEY'),
         'access_token_expire_minutes': int(os.getenv('JWT_ACCESS_TOKEN_EXPIRE_MINUTES')),
@@ -28,13 +30,13 @@ class Config:
         'discord_redirect_uri': os.getenv('DISCORD_REDIRECT_URI'),
         'discord_bot_token': os.getenv('DISCORD_BOT_TOKEN'),
         'discord_guild_id': os.getenv('DISCORD_GUILD_ID'),
-        'disord_logs_channel_id': os.getenv('DISCORD_LOGS_CHANNEL_ID'),
+        'discord_logs_channel_id': os.getenv('DISCORD_LOGS_CHANNEL_ID'),
 
         'frontend_uri': os.getenv('FRONTEND_URI'),
         
         'admin_secret_key': os.getenv('ADMIN_SECRET_KEY'),
 
-        'default_timezone': os.getenv('DEFAULT_TIMEZONE')
+        'default_timezone': os.getenv('DEFAULT_TIMEZONE'),
     }
 
     privilege_mapper = {
@@ -48,7 +50,7 @@ class Config:
     privilege_roles = {
         "tourist": "1268593987254485053",
         "worker": "1268594072994447440",
-        "сitizen": "1268594127809937461",
+        "citizen": "1268594127809937461",
         "aristocrat": "1268594162530516992",
         "apostle": "1268594193618436248"
     }

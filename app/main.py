@@ -6,12 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.common.error import BadRequest, UnprocessableError, UnauthorizatedError
 from app.config import Config
-from app.database.mongo import connect_and_init_db, close_db_connect
+from app.database.mongo import close_db_connect
+from app.common.startup import startup
 from app.api import admin, users, events
 
 app = FastAPI()
 
-app.add_event_handler("startup", connect_and_init_db)
+app.add_event_handler("startup", startup)
 app.add_event_handler("shutdown", close_db_connect)
 
 # Middleware
