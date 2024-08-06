@@ -51,30 +51,30 @@ async def payload():
 async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
     payload_bytes = bytes.fromhex(wallet.proof.payload)
     if len(payload_bytes) != 32:
-        raise BadRequest([f"Invalid payload length, got {len(payload_bytes)}, expected 32"])
+        raise BadRequest([f"Неверная длина полезной нагрузки, полученно {len(payload_bytes)}, ожидалось 32"])
     
     mac = hmac.new(Config.app_settings['ton_connect_secret'].encode(), payload_bytes[:16], sha256)
     payload_signature_bytes = mac.digest()
 
     if not payload_bytes[16:] == payload_signature_bytes[:16]:
-        raise BadRequest(["Invalid payload signature"])
+        raise BadRequest(["Неверная сигнатура полезной нагрузки"])
     
     now = int(time.time())
 
     expire_bytes = payload_bytes[8:16]
     expire_time = int.from_bytes(expire_bytes, "big")
     if now > expire_time:
-        raise BadRequest(["Payload expired"])
+        raise BadRequest(["Истек срок действия полезной нагрузки"])
     
     if now > wallet.proof.timestamp + Config.app_settings['proof_ttl']:
-        raise BadRequest(["TON proof has expired"])
+        raise BadRequest(["Истёк срок действия TON proof"])
 
     # TODO: Set site domain in production
     """ if wallet.proof.domain != "":
         raise BadRequest([f"Wrong domain, got {wallet.proof.domain}, expected {DOMAIN}"]) """
     
     if wallet.proof.domain.lengthBytes != len(wallet.proof.domain.value):
-        raise BadRequest([f"Domain length mismatched against provided length bytes of {wallet.proof.domain.value}"])
+        raise BadRequest([f"Длина домена не совпадает с длиной полученных байтов: {wallet.proof.domain.value}"])
     
     wc, whash = wallet.address.split(':', maxsplit=2)
 
@@ -94,13 +94,13 @@ async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depen
 
     address, public_key = await get_data_by_state_init(wallet.state_init)
     if address != wallet.address:
-        raise BadRequest(["Invalid state init"])
+        raise BadRequest(["Невалидное состояние инициализации"])
 
     try:
         verify_key = VerifyKey(public_key, HexEncoder)
         verify_key.verify(sha256(signature_message).digest(), b64decode(wallet.proof.signature))
     except:
-        raise BadRequest(["Invalid payload signature"])
+        raise BadRequest(["Невалидная сигнатура полезной нагрузки"])
     
     user = await get_user_by_address(db, wallet.address)
     if not user:
@@ -131,14 +131,14 @@ async def nft_presence(user: UserDB = Depends(get_current_user)):
 async def discord_oauth2(access_token: str, db: AsyncIOMotorDatabase = Depends(get_db)):
     address = await decode_access_token(access_token)
     if not address:
-        raise BadRequest(['Could not validate access token'])
+        raise BadRequest(['Не удается валидировать токен доступа'])
 
     user = await get_user_by_address(db, address)
     if not user:
-        raise BadRequest(['User not found'])
+        raise BadRequest(['Пользователь не найден'])
 
     if user.discord.id is not None:
-        raise BadRequest(['You already have a discord connected'])
+        raise BadRequest(['Дискорд уже подключен к данному аккаунту'])
 
     state = sha256(''.join(choices(ascii_letters + digits, k=16)).encode()).hexdigest()
     await update_user_discord_state(db, user.id, state)
@@ -156,7 +156,7 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
         raise BadRequest(["Authorization code or state not provided"])
     
     if state != oauth_state:
-        raise BadRequest(["Invalid state"])
+        raise BadRequest(["Невалидное состояние"])
 
     response = RedirectResponse(url="/")
     response.delete_cookie(key="oauth_state")

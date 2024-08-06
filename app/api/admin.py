@@ -22,17 +22,17 @@ router = APIRouter(
 async def connect(user_info: MinecraftUserInfo, db: AsyncIOMotorDatabase = Depends(get_db)):
     address = await decode_minecraft_token(user_info.token)
     if not address:
-        raise BadRequest(['Could not validate access token'])
+        raise BadRequest(['Не удается валидировать токен доступа'])
 
     user = await get_user_by_address(db, address)
     if not user:
-        raise BadRequest(['User not found'])
+        raise BadRequest(['Пользователь не найден'])
 
     if user.minecraft.name:
-        raise BadRequest(['You already have a minecraft connected'])
+        raise BadRequest(['Майнкрафт уже подключен к данному аккаунту'])
     
     if await get_user_by_minecraft_name(db, user_info.name):
-        raise BadRequest(['This account is already linked to another wallet'])
+        raise BadRequest(['Этот аккаунт уже привязан к другому кошельку'])
     
     user.minecraft.name = user_info.name
     
@@ -43,7 +43,7 @@ async def connect(user_info: MinecraftUserInfo, db: AsyncIOMotorDatabase = Depen
 async def get_user_by_name(name: str, db: AsyncIOMotorDatabase = Depends(get_db)):
     user = await get_user_by_minecraft_name(db, name)
     if not user:
-        raise BadRequest(['User not found'])
+        raise BadRequest(['Пользователь не найден'])
     
     return user
     
@@ -51,7 +51,7 @@ async def get_user_by_name(name: str, db: AsyncIOMotorDatabase = Depends(get_db)
 async def get_user_by_id(discord_id: int, db: AsyncIOMotorDatabase = Depends(get_db)):
     user = await get_user_by_discord_id(db, discord_id)
     if not user:
-        raise BadRequest(['User not found'])
+        raise BadRequest(['Пользователь не найден'])
     
     return user
 
@@ -59,18 +59,18 @@ async def get_user_by_id(discord_id: int, db: AsyncIOMotorDatabase = Depends(get
 @router.post('/minecraft/money-transfer', status_code=200, summary="Transfer money from one user to another", responses={400: {}})
 async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
     if transfer_data.sender_name == transfer_data.recipient_name:
-        raise BadRequest(['Sender and recipient names should be different'])
+        raise BadRequest(['Никнеймы отправителя и получателя должны отличаться'])
     
     sender = await get_user_by_minecraft_name(db, transfer_data.sender_name)
     recipient = await get_user_by_minecraft_name(db, transfer_data.recipient_name)
     if not sender:
-        raise BadRequest(['Sender not found'])
+        raise BadRequest(['Отправитель не найден'])
     
     if not recipient:
-        raise BadRequest(['Recipient not found'])
+        raise BadRequest(['Получатель не найден'])
     
     if not await has_sufficient_funds(db, transfer_data.sender_name, transfer_data.amount):
-        raise BadRequest(['Sender does not have sufficient funds'])
+        raise BadRequest(['У отправителя недостаточно средств'])
     
     await make_transfer(db, transfer_data.sender_name, 
                         transfer_data.recipient_name, transfer_data.amount)
