@@ -135,7 +135,7 @@ async def privilege_user_minecraft(
     user_address: str,
     privilege: str
 ):
-    conn[__db_collection].update_one(
+    await conn[__db_collection].update_one(
         {"_id": user_address},
         {"$set": {"minecraft.privilege": privilege}}
     )
