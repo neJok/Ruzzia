@@ -1,9 +1,6 @@
 import aiohttp
-<<<<<<< HEAD
 import httpx
 from motor.motor_asyncio import AsyncIOMotorDatabase
-=======
->>>>>>> 1fa4b7418493aeac7f8ec9f9365ad03f5d6c7a6e
 
 from decimal import Decimal
 
@@ -11,6 +8,7 @@ from app.config import Config
 from app.database.user import top_up, privilege_user_minecraft, get_user_by_address, add_transaction
 from app.common.discord_api import add_role_to_user, remove_role_from_user, send_message_to_logs
 from pytoniq_core import Address
+
 
 async def get_data_by_state_init(state_init: str):
     """Get address, public key by state init"""
@@ -38,17 +36,6 @@ async def get_last_transactions(
         async with session.get(url) as response:
             data = await response.json()
 
-<<<<<<< HEAD
-                    user = await get_user_by_address(db, user_address)
-                    if not user:
-                        continue
-                    
-                    if action["comment"] == "Top up":
-                        await top_up(db, user_address, amount)
-                    elif action["comment"] == "Privilege":                        # TODO: redo mapper when privilege costs will be known
-                        privilege = Config.privilege_mapper(int(amount))
-                        await privilege_user_minecraft(db, user_address, privilege)
-=======
             transactions = data["events"]
             for transaction in transactions:
                 if transaction['in_progress']: #Только завершенные транзакции
@@ -61,7 +48,6 @@ async def get_last_transactions(
                                 continue
                             if action['jetton']['symbol'] != Config.app_settings['token_symbol']: #Проверка на символ токена
                                 continue
->>>>>>> 1fa4b7418493aeac7f8ec9f9365ad03f5d6c7a6e
 
                             amount = Decimal(action["amount"])/(10**action['jetton']['decimals'])
                             user_address = str(action["sender"]["address"])
@@ -72,21 +58,6 @@ async def get_last_transactions(
 
                             await add_transaction(db, user_address, transaction['event_id'])
                             
-<<<<<<< HEAD
-                            privilege_role = Config.privilege_roles(privilege)
-                            await add_role_to_user(user.discord.id, privilege_role)
-                            await send_message_to_logs(f"Пользователю <@{user.discord.id}> выдана роль привелегии <@&{privilege_role}>")
-                        
-                    completed_transactions.append({
-                        # "comment_id": comment_id, 
-                        "amount": amount, 
-                        "transaction": transaction['event_id'], 
-                        "sender_wallet": action["sender"]['address'],
-                        "timestamp": transaction['timestamp'], 
-                    })
-                    
-    return completed_transactions
-=======
                             if action["comment"] == "Top up":
                                 await top_up(db, user_address, float(amount))
                             elif action["comment"] == "Privilege":
@@ -106,4 +77,3 @@ async def get_last_transactions(
                                         await send_message_to_logs(f"Пользователю <@{user.discord.id}> выдана роль привелегии <@&{privilege_role}>")
                                 except:
                                     continue
->>>>>>> 1fa4b7418493aeac7f8ec9f9365ad03f5d6c7a6e
