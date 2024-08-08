@@ -1,11 +1,10 @@
 import aiohttp
-import httpx
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from decimal import Decimal
 
 from app.config import Config
-from app.database.user import top_up, privilege_user_minecraft, get_user_by_address, add_transaction
+from app.database.user import inc_balance, privilege_user_minecraft, get_user_by_address, add_transaction
 from app.common.discord_api import add_role_to_user, remove_role_from_user, send_message_to_logs
 from pytoniq_core import Address
 
@@ -59,7 +58,7 @@ async def get_last_transactions(
                             await add_transaction(db, user_address, transaction['event_id'])
                             
                             if action["comment"] == "Top up":
-                                await top_up(db, user_address, float(amount))
+                                await inc_balance(db, user_address, float(amount))
                             elif action["comment"] == "Privilege":
                                 # TODO: redo mapper when privilege costs will be known
                                 privilege = Config.privilege_mapper[int(amount)]

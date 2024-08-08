@@ -17,6 +17,7 @@ class Config:
         'payload_ttl': int(os.getenv('PAYLOAD_TTL')),
         'proof_ttl': int(os.getenv('PROOF_TTL')),
         'our_wallet': os.getenv('OUR_WALLET'),
+        'our_wallet_mnemonics': os.getenv('OUR_WALLET_MNEMONICS'),
         'jetton_master_address': os.getenv('JETTON_MASTER_ADDRESS'),
         'token_symbol': os.getenv('TOKEN_SYMBOL'),
 
