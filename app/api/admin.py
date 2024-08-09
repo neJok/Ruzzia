@@ -7,10 +7,10 @@ from app.common.jwt import decode_minecraft_token
 from app.database.mongo import get_db
 from app.database.user import (get_user_by_address, update_user_minecraft_name, 
                                get_user_by_minecraft_name, get_user_by_discord_id,
-                               has_sufficient_funds, make_transfer)
+                               has_sufficient_funds, make_transfer, get_balances_after_transaction)
 from app.models.admin.connect import MinecraftUserInfo
 from app.models.user.user_model import UserDB
-from app.models.admin.money_transfer import MoneyTransferRequest
+from app.models.admin.money_transfer import MoneyTransferRequest, MoneyTransferResponse
 
 
 router = APIRouter(
@@ -56,7 +56,7 @@ async def get_user_by_id(discord_id: int, db: AsyncIOMotorDatabase = Depends(get
     return user
 
 
-@router.post('/minecraft/money-transfer', status_code=200, summary="Transfer money from one user to another", responses={400: {}})
+@router.post('/minecraft/money-transfer', status_code=200, response_model=MoneyTransferResponse, summary="Transfer money from one user to another", responses={400: {}})
 async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
     if transfer_data.sender_name == transfer_data.recipient_name:
         raise BadRequest(['Никнеймы отправителя и получателя должны отличаться'])
@@ -74,3 +74,10 @@ async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDa
     
     await make_transfer(db, transfer_data.sender_name, 
                         transfer_data.recipient_name, transfer_data.amount)
+    
+    (sender_balance_after_transaction, 
+     recipient_balance_after_transaction) = await get_balances_after_transaction(
+         db, transfer_data.sender_name, transfer_data.recipient_name)
+    
+    return MoneyTransferResponse(sender_balance_after_transaction=sender_balance_after_transaction, 
+                                 recipient_balance_after_transaction=recipient_balance_after_transaction)

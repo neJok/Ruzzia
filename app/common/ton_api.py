@@ -1,5 +1,4 @@
 import aiohttp
-import httpx
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from decimal import Decimal
