@@ -61,6 +61,9 @@ async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDa
     if transfer_data.sender_name == transfer_data.recipient_name:
         raise BadRequest(['Никнеймы отправителя и получателя должны отличаться'])
     
+    if transfer_data.amount < 0:
+        raise BadRequest(['Сумма перевода не должна быть отрицательным числом'])
+    
     sender = await get_user_by_minecraft_name(db, transfer_data.sender_name)
     recipient = await get_user_by_minecraft_name(db, transfer_data.recipient_name)
     if not sender:
