@@ -1,7 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from datetime import datetime
-from decimal import Decimal
 
 from app.models.user.user_model import UserDB
 
@@ -97,7 +96,7 @@ async def make_transfer(
     conn: AsyncIOMotorDatabase,
     sender_name: str,
     recipient_name: str,
-    amount: Decimal
+    amount: float
 ):
     await conn[__db_collection].update_one(
         {'minecraft.name': sender_name},
@@ -109,10 +108,22 @@ async def make_transfer(
     )
 
 
+async def get_balances_after_transaction(
+    conn: AsyncIOMotorDatabase,
+    sender_name: str,
+    recipient_name: str
+):
+    sender = await get_user_by_minecraft_name(conn, sender_name)
+    recipient = await get_user_by_minecraft_name(conn, recipient_name)
+    sender_balance_after_transaction = sender.balance
+    recipient_balance_after_transaction = recipient.balance
+    return sender_balance_after_transaction, recipient_balance_after_transaction
+
+
 async def has_sufficient_funds(
     conn: AsyncIOMotorDatabase, 
     sender_name: str, 
-    amount: Decimal
+    amount: float
 ):
     sender = await conn[__db_collection].find_one({'minecraft.name': sender_name})
     sender_balance = sender['balance']
