@@ -15,14 +15,16 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import timedelta
 
 from app.config import Config
-from app.models.user.connect_wallet import ConnectWalletRequest, PayloadResponse
-from app.database.user import get_user_by_address, create_user, update_user_discord_id, update_user_discord_state, get_user_by_discord_id
+from app.database.user import get_user_by_address, create_user, update_user_discord_id, update_user_discord_state, get_user_by_discord_id, inc_balance
 from app.database.mongo import get_db
 from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
 from app.common.discord_api import get_user_discord_id, authorize_discord
 from app.common.jwt import create_access_token, create_refresh_token, get_current_user, decode_access_token, create_minecraft_token
 from app.common.nft import check_user_existance_in_presale_table
+from app.common.litebalancer import send_tokens_to_address
+from app.models.user.conclusion import ConclusionRequest
+from app.models.user.connect_wallet import ConnectWalletRequest, PayloadResponse
 from app.models.user.token import TokensResponse
 from app.models.user.user_model import UserDB
 from app.models.user.nft_presence import NftPresenceResponse
@@ -188,3 +190,15 @@ async def minecraft_connect(user: UserDB = Depends(get_current_user), db: AsyncI
         data={"sub": user.id}, expires_delta=minecraft_token_expires
     )
     return MinecraftTokenReponse(token=minecraft_token)
+
+@router.post('/conclusion', status_code=200, summary="Withdraw the balance", responses={400: {}})
+async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depends(get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
+    if conclusion.amount <= 0:
+        raise BadRequest(['Нельзя вывести 0 или меньше токенов'])
+    
+    if user.balance < conclusion.amount:
+        raise BadRequest(['У вас не хватает средств на кошельке'])
+    
+    await inc_balance(db, user.id, -conclusion.amount)
+
+    await send_tokens_to_address(user.id, conclusion.amount)

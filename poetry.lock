@@ -1417,6 +1417,25 @@ pynacl = ">=1.5.0"
 requests = ">=2.28.2"
 
 [[package]]
+name = "pytoniq"
+version = "0.1.39"
+description = "TON Blockchain SDK"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "pytoniq-0.1.39-py3-none-any.whl", hash = "sha256:b535a8d5091c7b12e9a4efe86baed7861f1d89548bd67cdbdb3cbf25e616d37c"},
+    {file = "pytoniq-0.1.39.tar.gz", hash = "sha256:a3927577a8ec33cbc1f63de788850be461bbea94549cf65cfb3fde6ec224545a"},
+]
+
+[package.dependencies]
+pytoniq-core = ">=0.1.35"
+requests = ">=2.31.0"
+setuptools = ">=65.5.1"
+
+[package.extras]
+tvm = ["pytvm (>=0.0.11)"]
+
+[[package]]
 name = "pytoniq-core"
 version = "0.1.36"
 description = "TON Blockchain SDK"
@@ -2015,4 +2034,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f9cf8429376efe19548e99c40c9e322a9e1baf479ab465b5ab56a5c061a77f04"
+content-hash = "9cdc1d78307a7ffeda934263fe45ae29b42accaa018048b846f21791fd3c3ed3"

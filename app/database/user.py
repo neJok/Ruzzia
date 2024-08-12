@@ -130,7 +130,7 @@ async def has_sufficient_funds(
     return sender_balance >= amount
 
 
-async def top_up(
+async def inc_balance(
     conn: AsyncIOMotorDatabase,
     user_address: str,
     amount: float
