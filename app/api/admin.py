@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from uuid import uuid4
+
 from app.common.admin import check_admin_token
 from app.common.error import BadRequest
 from app.common.jwt import decode_minecraft_token
@@ -8,6 +10,7 @@ from app.database.mongo import get_db
 from app.database.user import (get_user_by_address, update_user_minecraft_name, 
                                get_user_by_minecraft_name, get_user_by_discord_id,
                                has_sufficient_funds, make_transfer, get_balances_after_transaction)
+from app.database.transaction_history import create_transaction_history
 from app.models.admin.connect import MinecraftUserInfo
 from app.models.user.user_model import UserDB
 from app.models.admin.money_transfer import MoneyTransferRequest, MoneyTransferResponse
@@ -77,6 +80,9 @@ async def money_transfer(transfer_data: MoneyTransferRequest, db: AsyncIOMotorDa
     
     await make_transfer(db, transfer_data.sender_name, 
                         transfer_data.recipient_name, transfer_data.amount)
+    
+    await create_transaction_history(db, str(uuid4()), transfer_data.sender_name,
+                        transfer_data.recipient_name, "in-game transfer", transfer_data.amount)
     
     (sender_balance_after_transaction, 
      recipient_balance_after_transaction) = await get_balances_after_transaction(
