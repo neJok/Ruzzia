@@ -1,5 +1,6 @@
 import hmac
 import time
+import asyncio
 
 from random import choices
 from string import ascii_letters, digits
@@ -201,4 +202,7 @@ async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depend
     
     await inc_balance(db, user.id, -conclusion.amount)
 
-    await send_tokens_to_address(db, user.id, conclusion.amount)
+    try:
+        await send_tokens_to_address(db, user.id, conclusion.amount)
+    except:
+        return BadRequest(["Не получилось вывести средства, попробуйте позже"])
