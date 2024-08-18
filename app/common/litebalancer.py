@@ -6,6 +6,7 @@ import asyncio
 
 from app.config import Config
 from app.database.transaction_history import create_transaction_history
+from app.database.user import inc_balance
 from app.common.ton_api import get_account_info
 
 async def send_tokens_to_address(db: AsyncIOMotorDatabase, destination_address: str, amount: float):
@@ -46,6 +47,10 @@ async def send_tokens_to_address(db: AsyncIOMotorDatabase, destination_address: 
         await asyncio.sleep(1500)
         account_info = await get_account_info(USER_JETTON_WALLET)
         transaction_id = account_info["result"]["last_transaction_id"]["hash"]
+    
+    if transaction_id == last_transaction_id:
+        await inc_balance(db, destination_address, amount)
+        raise Exception(f'Не получилось перевести пользователю {destination_address} {amount} валюты')
 
     await create_transaction_history(
         db, transaction_id, USER_JETTON_WALLET, DESTINATION_ADDRESS, "withdraw", amount

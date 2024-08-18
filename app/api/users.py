@@ -201,4 +201,4 @@ async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depend
     
     await inc_balance(db, user.id, -conclusion.amount)
 
-    await send_tokens_to_address(user.id, conclusion.amount)
+    await send_tokens_to_address(db, user.id, conclusion.amount)
