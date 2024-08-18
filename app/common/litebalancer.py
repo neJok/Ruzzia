@@ -13,7 +13,7 @@ async def send_tokens_to_address(db: AsyncIOMotorDatabase, destination_address: 
     provider = LiteBalancer.from_mainnet_config(1)
     await provider.start_up()
 
-    wallet = await WalletV4R2.from_mnemonic(provider=provider, mnemonics=mnemonics)
+    wallet = await WalletV4R2.from_mnemonic(provider=provider, mnemonics=Config.app_settings['our_wallet_mnemonics'].split(' '))
     USER_ADDRESS = wallet.address
 
     USER_JETTON_WALLET = (await provider.run_get_method(address=Address(Config.app_settings['jetton_master_address']).to_str(is_user_friendly=True, is_bounceable=True, is_url_safe=True),
