@@ -195,7 +195,7 @@ async def minecraft_connect(user: UserDB = Depends(get_current_user), db: AsyncI
 @router.post('/conclusion', status_code=200, summary="Withdraw the balance", responses={400: {}})
 async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depends(get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
     if conclusion.amount <= 0:
-        raise BadRequest(['Нельзя вывести 0 или меньше токенов'])
+        raise BadRequest(['Сумма вывода должна быть больше 0'])
     
     if user.balance < conclusion.amount:
         raise BadRequest(['У вас не хватает средств на кошельке'])
