@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.common.error import BadRequest, UnprocessableError, UnauthorizatedError
 from app.config import Config
-from app.database.mongo import close_db_connect
 from app.common.startup import startup
 from app.common.shutdown import shutdown
 from app.api import admin, users, events

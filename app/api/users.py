@@ -1,5 +1,6 @@
 import hmac
 import time
+import asyncio
 
 from random import choices
 from string import ascii_letters, digits
@@ -202,13 +203,14 @@ async def minecraft_connect(user: UserDB = Depends(get_current_user)):
 @router.post('/conclusion', status_code=200, summary="Withdraw the balance", responses={400: {}})
 async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depends(get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
     if conclusion.amount <= 0:
-        raise BadRequest(['Нельзя вывести 0 или меньше токенов'])
+        raise BadRequest(['Сумма вывода должна быть больше 0'])
     
     if user.balance < conclusion.amount:
         raise BadRequest(['У вас не хватает средств на кошельке'])
     
     await inc_balance(db, user.id, -conclusion.amount)
 
+<<<<<<< HEAD
     await send_tokens_to_address(user.id, conclusion.amount)
 
 
@@ -219,3 +221,9 @@ async def get_queue_status(user: UserDB = Depends(get_current_user), r: Redis = 
         raise BadRequest(['Пользователя нет в очереди'])
     
     return QueueStatusResponse(user_position=user_position)
+=======
+    try:
+        await send_tokens_to_address(db, user.id, conclusion.amount)
+    except:
+        return BadRequest(["Не получилось вывести средства, попробуйте позже"])
+>>>>>>> b1e2909aa8ce8e62dfd9fb4448eb12ba4409babd
