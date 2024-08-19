@@ -12,11 +12,14 @@ from hashlib import sha256
 from nacl.signing import VerifyKey
 from nacl.encoding import HexEncoder
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from redis.asyncio import Redis
 from datetime import timedelta
 
 from app.config import Config
 from app.database.user import get_user_by_address, create_user, update_user_discord_id, update_user_discord_state, get_user_by_discord_id, inc_balance
 from app.database.mongo import get_db
+from app.redis.redis import get_redis
+from app.redis.user import left_get_position_in_queue, right_add_to_queue, left_remove_from_queue
 from app.common.error import BadRequest
 from app.common.ton_api import get_data_by_state_init
 from app.common.discord_api import get_user_discord_id, authorize_discord
@@ -29,6 +32,7 @@ from app.models.user.token import TokensResponse
 from app.models.user.user_model import UserDB
 from app.models.user.nft_presence import NftPresenceResponse
 from app.models.user.connect_minecraft import MinecraftTokenReponse
+from app.models.user.registration_queue import QueueStatusResponse
 
 
 router = APIRouter()
@@ -50,7 +54,7 @@ async def payload():
 
 
 @router.post('/connect', response_model=TokensResponse, status_code=200, summary='Ton connect', responses={400: {}})
-async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depends(get_db), r: Redis = Depends(get_redis)):
     payload_bytes = bytes.fromhex(wallet.proof.payload)
     if len(payload_bytes) != 32:
         raise BadRequest([f"Неверная длина полезной нагрузки, полученно {len(payload_bytes)}, ожидалось 32"])
@@ -94,6 +98,8 @@ async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depen
     signature_message.extend('ton-connect'.encode())
     signature_message.extend(sha256(message).digest())
 
+    await right_add_to_queue(r, wallet.address)
+
     address, public_key = await get_data_by_state_init(wallet.state_init)
     if address != wallet.address:
         raise BadRequest(["Невалидное состояние инициализации"])
@@ -103,6 +109,8 @@ async def connect(wallet: ConnectWalletRequest, db: AsyncIOMotorDatabase = Depen
         verify_key.verify(sha256(signature_message).digest(), b64decode(wallet.proof.signature))
     except:
         raise BadRequest(["Невалидная сигнатура полезной нагрузки"])
+    
+    # await left_remove_from_queue(r)
     
     user = await get_user_by_address(db, wallet.address)
     if not user:
@@ -181,7 +189,7 @@ async def discord_oauth2_callback(request: Request, oauth_state: Optional[str] =
     
 
 @router.get('/minecraft', status_code=200, response_model=MinecraftTokenReponse, summary="Create minecraft connect token", responses={400: {}})
-async def minecraft_connect(user: UserDB = Depends(get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
+async def minecraft_connect(user: UserDB = Depends(get_current_user)):
     if user.minecraft.name:
         raise BadRequest(['Майнкрафт уже подключен к данному аккаунту'])
     
@@ -202,3 +210,12 @@ async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depend
     await inc_balance(db, user.id, -conclusion.amount)
 
     await send_tokens_to_address(user.id, conclusion.amount)
+
+
+@router.get('/queue-status', status_code=200, response_model=QueueStatusResponse, summary="Get registration queue status", responses={400: {}})
+async def get_queue_status(user: UserDB = Depends(get_current_user), r: Redis = Depends(get_redis)):
+    user_position = await left_get_position_in_queue(r, user.id)
+    if user_position is None:
+        raise BadRequest(['Пользователя нет в очереди'])
+    
+    return QueueStatusResponse(user_position=user_position)

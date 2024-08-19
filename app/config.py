@@ -38,6 +38,10 @@ class Config:
         'admin_secret_key': os.getenv('ADMIN_SECRET_KEY'),
 
         'default_timezone': os.getenv('DEFAULT_TIMEZONE'),
+
+        'redis_host': os.getenv('REDIS_HOST'),
+        'redis_port': os.getenv('REDIS_PORT'),
+        'redis_password': os.getenv('REDIS_PASSWORD'),
     }
 
     privilege_mapper = {
