@@ -19,6 +19,7 @@ pyjwt = "^2.8.0"
 pytz = "^2024.1"
 pytoniq-core = "^0.1.36"
 pytoniq = "^0.1.39"
+redis = "^5.0.8"
 
 
 [build-system]

@@ -54,6 +54,11 @@ services:
 
       - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
 
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+
     ports:
       - 5000:5000
 
@@ -76,6 +81,23 @@ services:
       networks:
         - default
 
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - redis_data:/data/redis
+    env_file:
+      - .env
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD} --maxmemory ${REDIS_MAXMEMORY} --maxmemory-policy ${REDIS_MAXMEMORY_POLICY}
+
 volumes:
   db-data:
   mongod.conf:
+  redis_data:
