@@ -15,9 +15,6 @@ async def check_trasactions_task():
     db = await get_db()
 
     while True:
-<<<<<<< HEAD
-        # await get_last_transactions(db)
-=======
         data = await get_last_transactions(Config.app_settings['our_wallet'])
 
         transactions = data["events"]
@@ -66,7 +63,6 @@ async def check_trasactions_task():
                             except:
                                 continue
 
->>>>>>> b1e2909aa8ce8e62dfd9fb4448eb12ba4409babd
         await asyncio.sleep(10)
 
 async def startup():

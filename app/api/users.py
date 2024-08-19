@@ -210,8 +210,10 @@ async def create_conclusion(conclusion: ConclusionRequest, user: UserDB = Depend
     
     await inc_balance(db, user.id, -conclusion.amount)
 
-<<<<<<< HEAD
-    await send_tokens_to_address(user.id, conclusion.amount)
+    try:
+        await send_tokens_to_address(db, user.id, conclusion.amount)
+    except:
+        return BadRequest(["Не получилось вывести средства, попробуйте позже"])
 
 
 @router.get('/queue-status', status_code=200, response_model=QueueStatusResponse, summary="Get registration queue status", responses={400: {}})
@@ -221,9 +223,3 @@ async def get_queue_status(user: UserDB = Depends(get_current_user), r: Redis = 
         raise BadRequest(['Пользователя нет в очереди'])
     
     return QueueStatusResponse(user_position=user_position)
-=======
-    try:
-        await send_tokens_to_address(db, user.id, conclusion.amount)
-    except:
-        return BadRequest(["Не получилось вывести средства, попробуйте позже"])
->>>>>>> b1e2909aa8ce8e62dfd9fb4448eb12ba4409babd
